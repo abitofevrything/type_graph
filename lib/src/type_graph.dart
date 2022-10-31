@@ -11,6 +11,7 @@ import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/dart/element/visitor.dart';
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:gviz/gviz.dart';
+import 'package:logging/logging.dart';
 
 /// A utility class to generate a graph of the type hierarchy across a set of dart source files.
 ///
@@ -28,6 +29,8 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
   late final AnalysisContext _context = ContextBuilder().createContext(contextRoot: _root);
   late final AnalysisSession _session = _context.currentSession;
 
+  final Logger _logger = Logger('Type Graph');
+
   /// Create a new [TypeGraphBuilder].
   TypeGraphBuilder(this.paths) {
     final roots = ContextLocator().locateRoots(includedPaths: paths);
@@ -36,6 +39,7 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
       throw Exception('Unable to locate context root for paths');
     }
 
+    _logger.fine('Found ${roots.length} roots, using first root');
     _root = roots.first;
   }
 
@@ -44,10 +48,14 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
   Future<void> writeGraphToFile(io.File file) async {
     final graph = await createGvizGraph();
 
+    _logger.info('Writing graph to file ${file.path}...');
+
     final sink = file.openWrite();
     graph.write(sink);
     await sink.flush();
     await sink.close();
+
+    _logger.info('Done writing graph to file ${file.path}');
   }
 
   /// Create a type graph for the specified [paths] in [Graphviz](https://graphviz.org/) format.
@@ -87,6 +95,7 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
     _graph.clear();
     await Future.wait(_files.map(_processFile));
 
+    _logger.info('Done building graph with ${_graph.length} types found');
     return _graph;
   }
 
@@ -96,6 +105,8 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
       throw Exception('Invalid analysis result for file ${file.path}');
     }
 
+    _logger.fine('Processing file ${file.path}');
+
     for (final element in result.element.children) {
       element.accept(this);
     }
@@ -103,6 +114,8 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
 
   Future<void> _locateFiles() async {
     _files.clear();
+
+    _logger.fine('Locating files to be analysed');
 
     final folders = <Folder>[];
 
@@ -136,11 +149,14 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
         }
       }
     }
+
+    _logger.info('Found ${_files.length} dart files to analyze');
   }
 
   @override
   void visitElement(Element element) {
     if (element is InterfaceElement) {
+      _logger.finer('Found element $element');
       _graph[element.thisType] =
           element.allSupertypes.map((type) => type.element.thisType).toList();
     }
