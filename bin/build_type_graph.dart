@@ -16,7 +16,7 @@ void main(List<String> args) async {
     ..addOption(
       'output',
       abbr: 'o',
-      defaultsTo: 'output.gz',
+      defaultsTo: 'output.gv',
       help: 'The file to output the graph data to',
     )
     ..addFlag(
