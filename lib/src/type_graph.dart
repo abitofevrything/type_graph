@@ -12,6 +12,7 @@ import 'package:analyzer/dart/element/visitor.dart';
 import 'package:analyzer/file_system/file_system.dart';
 import 'package:gviz/gviz.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as path;
 
 /// A utility class to generate a graph of the type hierarchy across a set of dart source files.
 ///
@@ -45,7 +46,8 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
     _logger.fine('Found ${roots.length} roots, using first root');
     _root = roots.first;
 
-    graphName = name ?? _root.included.map((res) => res.path).join(', ');
+    graphName =
+        name ?? _root.included.map((res) => res.path).map(path.basenameWithoutExtension).join(', ');
   }
 
   /// Create a type graph for the specified [paths] and output it in
