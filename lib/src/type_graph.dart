@@ -22,6 +22,9 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
   /// The paths that will be included in the generated graph.
   final List<String> paths;
 
+  /// The name of the graph in the output file.
+  late final String graphName;
+
   final Map<InterfaceType, List<InterfaceType>> _graph = {};
   final List<File> _files = [];
 
@@ -32,7 +35,7 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
   final Logger _logger = Logger('Type Graph');
 
   /// Create a new [TypeGraphBuilder].
-  TypeGraphBuilder(this.paths) {
+  TypeGraphBuilder(this.paths, {String? name}) {
     final roots = ContextLocator().locateRoots(includedPaths: paths);
 
     if (roots.isEmpty) {
@@ -41,6 +44,8 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
 
     _logger.fine('Found ${roots.length} roots, using first root');
     _root = roots.first;
+
+    graphName = name ?? _root.included.map((res) => res.path).join(', ');
   }
 
   /// Create a type graph for the specified [paths] and output it in
@@ -72,7 +77,7 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
       return MapEntry(typeName, parentNames);
     });
 
-    final graph = Gviz();
+    final graph = Gviz(name: graphName);
 
     for (final node in display.keys) {
       graph.addNode(node);
