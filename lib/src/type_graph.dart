@@ -109,8 +109,10 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
     for (final path in paths) {
       final resource = _session.resourceProvider.getResource(path);
 
-      if (resource is File && resource.path.endsWith('.dart')) {
-        _files.add(resource);
+      if (resource is File) {
+        if (resource.path.endsWith('.dart')) {
+          _files.add(resource);
+        }
       } else if (resource is Folder) {
         folders.add(resource);
       } else {
@@ -123,8 +125,10 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
       final resources = folder.getChildren();
 
       for (final resource in resources) {
-        if (resource is File && resource.path.endsWith('.dart')) {
-          _files.add(resource);
+        if (resource is File) {
+          if (resource.path.endsWith('.dart')) {
+            _files.add(resource);
+          }
         } else if (resource is Folder) {
           folders.add(resource);
         } else {

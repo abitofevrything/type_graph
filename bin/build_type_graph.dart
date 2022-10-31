@@ -39,7 +39,7 @@ Options:''');
   }
 
   final files = [
-    for (final file in results.rest) path.absolute(path.normalize(file)),
+    for (final file in results.rest) path.canonicalize(file),
   ];
 
   final graphBuilder = TypeGraphBuilder(files);
