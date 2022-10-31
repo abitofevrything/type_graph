@@ -164,8 +164,21 @@ class TypeGraphBuilder extends GeneralizingElementVisitor<void> {
   void visitElement(Element element) {
     if (element is InterfaceElement) {
       _logger.finer('Found element $element');
-      _graph[element.thisType] =
-          element.allSupertypes.map((type) => type.element.thisType).toList();
+
+      final type = element.thisType;
+
+      final superTypes = [
+        if (type.superclass != null) type.superclass!,
+        ...type.interfaces,
+        ...type.mixins,
+        ...type.superclassConstraints,
+      ].map((type) => type.element.thisType).toList();
+
+      if (superTypes.length > 1) {
+        superTypes.removeWhere((type) => type.isDartCoreObject);
+      }
+
+      _graph[type] = superTypes;
     }
   }
 }
