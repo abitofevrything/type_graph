@@ -1,6 +1,6 @@
 name: type_graph
 description: Build graphs of your type hierarchies in your Dart/Flutter apps.
-version: 1.0.1
+version: 1.1.0
 repository: https://github.com/abitofevrything/type_graph
 
 environment:
